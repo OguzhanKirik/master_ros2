@@ -1,0 +1,20 @@
+# ROS 2 workspace ignores
+build/
+install/
+log/
+
+# colcon metadata
+.colcon/
+
+# VSCode, JetBrains, etc. (optional)
+.vscode/
+.idea/
+
+# Python cache (if you have Python packages)
+__pycache__/
+*.pyc
+
+# CMake extra files (if not in build/)
+CMakeCache.txt
+CMakeFiles/
+
