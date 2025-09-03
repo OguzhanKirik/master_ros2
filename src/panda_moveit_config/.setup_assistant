@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: panda_description
+    relative_path: urdf/panda.urdf.xacro
+  srdf:
+    relative_path: config/panda.srdf
+  package_settings:
+    author_name: Jonathan Cacace
+    author_email: jonathan.cacace@eurecat.org
+    generated_timestamp: 1731053391
