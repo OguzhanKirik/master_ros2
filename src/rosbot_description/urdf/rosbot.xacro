@@ -4,6 +4,10 @@
 <xacro:include filename="$(find rosbot_description)/urdf/materials.xacro" />
 <xacro:include filename="$(find rosbot_description)/urdf/rosbot.ros2control" />
 <xacro:include filename="$(find rosbot_description)/urdf/rosbot.gazebo" />
+
+<link name="base_footprint"/>
+
+
 <link name="base_link">
   <inertial>
     <origin xyz="0.004279734419382094 0.0 0.05375741183973183" rpy="0 0 0"/>
@@ -69,30 +73,37 @@
 
 <link name="lidar_1">
   <inertial>
-    <origin xyz="0.0 0.0 0.009999999999999981" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.010000000000000009" rpy="0 0 0"/>
     <mass value="0.0754575997873079"/>
     <inertia ixx="1.9e-05" iyy="1.9e-05" izz="3.3e-05" ixy="0.0" iyz="0.0" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="-0.05 -0.0 -0.12" rpy="0 0 0"/>
+    <origin xyz="-0.05 -0.0 -0.21" rpy="0 0 0"/>
     <geometry>
       <mesh filename="file://$(find rosbot_description)/meshes/lidar_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="-0.05 -0.0 -0.12" rpy="0 0 0"/>
+    <origin xyz="-0.05 -0.0 -0.21" rpy="0 0 0"/>
     <geometry>
       <mesh filename="file://$(find rosbot_description)/meshes/lidar_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
+<joint name="base_joint" type="fixed">
+  <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+</joint>
+
+
 <joint name="right_wheel_joint" type="continuous">
   <origin xyz="0.0 -0.1 0.05" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="right_wheel_1"/>
-  <axis xyz="0.0 -1.0 0.0"/>
+  <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
 <joint name="left_wheel_joint" type="continuous">
@@ -103,9 +114,10 @@
 </joint>
 
 <joint name="lidar_joint" type="fixed">
-  <origin xyz="0.05 0.0 0.12" rpy="0 0 0"/>
+  <origin xyz="0.05 0.0 0.21" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="lidar_1"/>
 </joint>
+
 
 </robot>

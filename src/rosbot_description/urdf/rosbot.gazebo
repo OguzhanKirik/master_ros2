@@ -5,23 +5,23 @@
 
 <gazebo reference="base_link">
   <material>${body_color}</material>
-  <mu1>1500</mu1>
-  <mu2>1500</mu2>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
   <self_collide>true</self_collide>
   <gravity>true</gravity>
 </gazebo>
 
 <gazebo reference="right_wheel_1">
   <material>${body_color}</material>
-  <mu1>1500</mu1>
-  <mu2>1500</mu2>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
   <self_collide>true</self_collide>
 </gazebo>
 
 <gazebo reference="left_wheel_1">
   <material>${body_color}</material>
-  <mu1>1500</mu1>
-  <mu2>1500</mu2>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
   <self_collide>true</self_collide>
 </gazebo>
 
@@ -57,7 +57,7 @@
         <tf_topic>/tf</tf_topic>        
         <frame_id>odom</frame_id>     
         <odom_topic>odom</odom_topic>             
-        <child_frame_id>base_link</child_frame_id>            
+        <child_frame_id>base_footprint</child_frame_id>            
 
 </plugin>
 </gazebo>
@@ -74,8 +74,8 @@
               <horizontal>
                 <samples>640</samples>
                 <resolution>1</resolution>
-                <min_angle>-1.396263</min_angle>
-                <max_angle>1.396263</max_angle>
+                <min_angle>0</min_angle>
+                <max_angle>6.280000</max_angle>
               </horizontal>
               <vertical>
                 <samples>1</samples>
