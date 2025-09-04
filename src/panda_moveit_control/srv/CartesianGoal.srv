@@ -1,0 +1,12 @@
+# Request
+float64 target_x
+float64 target_y  
+float64 target_z
+---
+# Response
+bool success
+string message
+float64 fraction_achieved
+float64 current_x
+float64 current_y
+float64 current_z

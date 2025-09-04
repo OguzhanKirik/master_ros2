@@ -61,6 +61,7 @@ void CartesianPlanning::plan() {
     const double jump_th = 0.0;
     const double step = 0.01;
     double fraction = move_group.computeCartesianPath(waypoints, step, jump_th, traj);
+    // Fraction is the percentage of the path succesfully planned.
     if( fraction > 0.8 )
         move_group.execute(traj); 
     else 

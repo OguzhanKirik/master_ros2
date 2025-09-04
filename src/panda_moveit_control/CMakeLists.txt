@@ -12,7 +12,9 @@ find_package(moveit REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package( moveit_ros_planning_interface  REQUIRED )
-
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
 
 add_executable( joint_space_planning src/joint_space_planning.cpp ) 
@@ -21,23 +23,63 @@ ament_target_dependencies(joint_space_planning rclcpp std_msgs moveit_ros_planni
 add_executable( cartesian_space_planning src/cartesian_space_planning.cpp ) 
 ament_target_dependencies(cartesian_space_planning rclcpp std_msgs moveit_ros_planning_interface)
 
+add_executable( cartesian_goal_planning src/cartesian_goal_planning.cpp ) 
+ament_target_dependencies(cartesian_goal_planning 
+  rclcpp 
+  moveit_core 
+  moveit_ros_planning_interface 
+  moveit_ros_planning 
+  moveit_msgs 
+  geometry_msgs
+  tf2
+  tf2_ros
+)
 
 add_executable( planning_with_obstacles src/planning_with_obstacles.cpp ) 
 ament_target_dependencies(planning_with_obstacles rclcpp std_msgs moveit_ros_planning_interface)
+
+# Add service generation
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/CartesianGoal.srv"
+)
+
+# Add new service executable
+add_executable(cartesian_goal_service src/cartesian_goal_service.cpp)
+
+ament_target_dependencies(cartesian_goal_service 
+  rclcpp 
+  moveit_core 
+  moveit_ros_planning_interface 
+  moveit_ros_planning 
+  moveit_msgs 
+  geometry_msgs
+  tf2
+  tf2_ros
+)
+
+# Link service interfaces
+rosidl_target_interfaces(cartesian_goal_service ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 
 install(DIRECTORY launch  
   DESTINATION share/${PROJECT_NAME}
 )
-
 install(TARGETS joint_space_planning
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 install(TARGETS cartesian_space_planning
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
+install(TARGETS cartesian_goal_planning
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
 install(TARGETS planning_with_obstacles
   RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS
+  cartesian_goal_planning
+  cartesian_goal_service
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 
