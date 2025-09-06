@@ -1,4 +1,3 @@
-
 import os
 from launch import LaunchDescription
 from ament_index_python.packages import get_package_share_directory
@@ -14,13 +13,10 @@ def generate_launch_description():
 
     ld = LaunchDescription()
     
-    
-
     xacro_path = 'urdf/panda.urdf.xacro'
     
     robot_description = PathJoinSubstitution([
         get_package_share_directory('panda_description'),	
-        #get_package_share_directory('panda_moveit_config'),	
         xacro_path
     ])
 
@@ -34,28 +30,24 @@ def generate_launch_description():
         }]
     )
 
-
-
-    workspace_path = os.environ.get('COLCON_PREFIX_PATH') or os.environ.get('AMENT_PREFIX_PATH')
-    pkg_panda_description = workspace_path + "/panda_description/share"
+    # Fixed resource path configuration
+    pkg_panda_description = get_package_share_directory('panda_description')
+    
+    # Set the resource path to the parent directory so Gazebo can find models
     gz_resource_path = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
-        value=[pkg_panda_description]
+        value=[os.path.dirname(pkg_panda_description)]
     )
 
     # Spawn
     spawn_node = Node(package='ros_gz_sim', executable='create',
                  arguments=['-name', 'panda', '-topic', '/robot_description'], output='screen')
 
-    
     load_joint_state_broadcaster = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'joint_state_broadcaster'],
         output='screen'
     )
-
-    
-    
 
     sdf_file_path = os.path.join(
         FindPackageShare('panda_description').find('panda_description'),
@@ -86,48 +78,47 @@ def generate_launch_description():
              'eef_controller'],
         output='screen'
     )
+    
     color_camera_bridge = Node(package='ros_gz_bridge', executable='parameter_bridge',
-			name = 'color_camera_bridge',
-			output='screen',
-			parameters=[{
-				'use_sim_time': True
-			}],
-			arguments = [
-				'/color_camera' + '@sensor_msgs/msg/Image' + '[ignition.msgs.Image'
-			],
-			remappings = [
-				('/color_camera', '/color_camera')
-			])
+            name = 'color_camera_bridge',
+            output='screen',
+            parameters=[{
+                'use_sim_time': True
+            }],
+            arguments = [
+                '/color_camera' + '@sensor_msgs/msg/Image' + '[ignition.msgs.Image'
+            ],
+            remappings = [
+                ('/color_camera', '/color_camera')
+            ])
 
     depth_camera_bridge = Node(package='ros_gz_bridge', executable='parameter_bridge',
-			name = 'depth_camera_bridge',
-			output='screen',
-			parameters=[{
-				'use_sim_time': True
-			}],
-			arguments = [
-				'/depth_camera' + '@sensor_msgs/msg/Image' + '[ignition.msgs.Image',
-				'/depth_camera/points' + '@sensor_msgs/msg/PointCloud2' + '[ignition.msgs.PointCloudPacked'
-			],
-			remappings = [
-				('/depth_camera', '/depth_camera'),
-				('/depth_camera/points', '/depth_camera/points')
-			])
-	
+            name = 'depth_camera_bridge',
+            output='screen',
+            parameters=[{
+                'use_sim_time': True
+            }],
+            arguments = [
+                '/depth_camera' + '@sensor_msgs/msg/Image' + '[ignition.msgs.Image',
+                '/depth_camera/points' + '@sensor_msgs/msg/PointCloud2' + '[ignition.msgs.PointCloudPacked'
+            ],
+            remappings = [
+                ('/depth_camera', '/depth_camera'),
+                ('/depth_camera/points', '/depth_camera/points')
+            ])
+    
     depth_cam_data2cam_link_tf = Node(package='tf2_ros',
                      executable='static_transform_publisher',
                      name='cam3Tolink',
                      output='log',
                      arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'camera_link', 'panda/link0/d435_depth'])
 
-
-
-    ld.add_action( load_joint_state_broadcaster )
-    ld.add_action( load_position_controller )       
-    ld.add_action( gz_resource_path )
+    ld.add_action( gz_resource_path )  # Move this before gazebo node
+    ld.add_action( ignition_gazebo_node )
     ld.add_action( robot_state_publisher_node )
     ld.add_action( spawn_node )
-    ld.add_action( ignition_gazebo_node )
+    ld.add_action( load_joint_state_broadcaster )
+    ld.add_action( load_position_controller )       
     ld.add_action( color_camera_bridge )
     ld.add_action( depth_camera_bridge )
     ld.add_action( depth_cam_data2cam_link_tf )
