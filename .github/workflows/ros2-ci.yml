@@ -58,19 +58,20 @@ jobs:
       run: |
         source /opt/ros/humble/setup.bash
         echo "Starting full workspace build..."
-        echo "Available packages to build:"
-        find . -name "package.xml" -exec dirname {} \; | sort
         
+        # Build all packages except px4_ctrl
         colcon build \
+          --packages-ignore px4_ctrl \
           --cmake-args -DCMAKE_BUILD_TYPE=Release \
-          --packages-skip-by-dep px4_msgs \
-          --continue-on-error \
           --event-handlers console_direct+
         
-        echo "Build process completed"
-        echo "Build summary:"
-        ls -la build/ || echo "No build directory found"
-        ls -la install/ || echo "No install directory found"
+        # Try to build px4_ctrl separately (allow failure)
+        echo "Attempting to build px4_ctrl (may fail due to missing dependencies)..."
+        colcon build \
+          --packages-select px4_ctrl \
+          --cmake-args -DCMAKE_BUILD_TYPE=Release \
+          --event-handlers console_direct+ \
+          --continue-on-error || echo "px4_ctrl build failed - missing px4_msgs dependency"
 
     - name: Run comprehensive tests
       shell: bash
