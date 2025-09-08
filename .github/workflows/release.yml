@@ -1,13 +1,17 @@
-name: ROS2 Main CI
+name: Release Build
 
 on:
-  push:
-    branches: [ main, master ]
-  schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
-  full-build-and-test:
+  release-build:
     runs-on: ubuntu-22.04
     container:
       image: osrf/ros:humble-desktop-full
@@ -32,38 +36,25 @@ jobs:
           ros-humble-gazebo-ros-pkgs \
           ros-humble-tf2-geometry-msgs
 
-    - name: Initialize rosdep
-      run: |
-        rosdep init || true
-        rosdep update
-
-    - name: Install workspace dependencies
+    - name: Build optimized release
       run: |
         source /opt/ros/humble/setup.bash
         rosdep install --from-paths . --ignore-src -r -y || true
+        colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3"
 
-    - name: Build ALL packages
-      run: |
-        source /opt/ros/humble/setup.bash
-        colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-    - name: Run comprehensive tests
+    - name: Create release package
       run: |
         source /opt/ros/humble/setup.bash
         source install/setup.bash
         
-        # Test all packages
-        echo "Testing all packages..."
-        ros2 pkg list | grep -E "(panda_moveit_control|my_opencv_package|panda_description|px4_ctrl)"
+        # Create a release archive
+        tar -czf master_ros2_ws_release.tar.gz install/
         
-        # Run colcon tests if available
-        colcon test --return-code-on-test-failure || echo "No tests found"
+        echo "Release package created: master_ros2_ws_release.tar.gz"
+        ls -la master_ros2_ws_release.tar.gz
 
-    - name: Upload build artifacts
+    - name: Upload release asset
       uses: actions/upload-artifact@v4
-      if: always()
       with:
-        name: full-build-logs
-        path: |
-          log/
-          build/
+        name: release-package
+        path: master_ros2_ws_release.tar.gz
